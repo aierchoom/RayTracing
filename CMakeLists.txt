@@ -20,6 +20,8 @@ set(CHAPTERS
 
 set(chapter1
   1.ppm
+  2.first_ray_tracer
+  3.start_sphere
 )
 
 foreach(CHAPTER ${CHAPTERS})

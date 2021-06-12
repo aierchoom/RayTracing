@@ -1,20 +1,18 @@
 #include <iostream>
 #include <fstream>
 
-#include "common/Canvas.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
 
-struct Color {
-  float r, g, b;
-};
+#include "common/Canvas.h"
+#include "common/vec3.h"
+#include "common/ray.h"
 
 int main() {
-  int col = 2000;  // nx
-  int row = 1000;  // ny
+  int col = 200;
+  int row = 100;
 
   const char *render_target = "image.ppm";
 
@@ -24,16 +22,9 @@ int main() {
   ppm_file << "P6\n" << col << " " << row << "\n255\n";
   for (int i = 0; i < row; i++) {
     for (int j = 0; j < col; j++) {
-      float r = float(j) / float(col);
-      float g = float(row - i) / float(row);
-      float b = 0.2;
-      int ir  = int(255.99 * r);
-      int ig  = int(255.99 * g);
-      int ib  = int(255.99 * b);
-
-      canvas[i][j].r = ir;
-      canvas[i][j].g = ig;
-      canvas[i][j].b = ib;
+      Vec3 color(float(j) / float(col), float(row - i) / float(row), 0.2);
+      color *= 255.99f;
+      canvas[i][j] = color;
     }
   }
 

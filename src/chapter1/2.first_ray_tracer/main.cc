@@ -10,23 +10,20 @@
 #include "common/vec3.h"
 #include "common/ray.h"
 
+const char *separator = "----------";
+
 Vec3 Color(const Ray &ray) {
-  // 获得光线的方向
+  // 光线方向
   Vec3 unit_direction = UnitVector(ray.direction());
-  // 获得将y限定到[0,1]的值t
+  // 光线强度(使用画布的高度作为强度，并且clamp to (0.0,1.0))
   float t = 0.5f * (unit_direction.y + 1.0f);
-  /**
-   * Vec3(0.5f, 0.7f, 1.0f)=sky color(blue)
-   * r:(1.0-t)+t*0.5
-   * g:(1.0-t)+t*0.7
-   * b:(1.0-t)+t=1.0
-   */
+  // (1.0f - t)翻转光线的强度方向，让底部的光线更偏向于白色
   return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);
 }
 
 int main() {
-  int nx = 800;
-  int ny = 400;
+  int nx = 1200;
+  int ny = 600;
 
   const char *render_target = "image.ppm";
 
@@ -39,15 +36,27 @@ int main() {
   Vec3 origin(0.0f, 0.0f, 0.0f);
 
   ppm_file << "P6\n" << nx << " " << ny << "\n255\n";
-  for (int i = 0; i < ny; i++) {
-    for (int j = 0; j < nx; j++) {
-      // u:0->1
-      float u = float(j) / float(nx);
-      // v:1->0
-      float v = float(ny - i) / float(ny);
+  // 1.以左下角作为基准点去扫描
+  // 2.图片绘制的习惯为从左上角开始绘制
+  // 3.j=ny-1,x=0;即将j光标移动到左下角开始绘制
+  // 4.综上，需要翻转y轴的v值
+  // 5.左下角uv为(0,0)
+  // 6.左下角的光线方向为(0,0,0)->(-2,-1,-1)
+  // 7.右上角的光线方向为(0,0,0)->(2,1,-1)
+  for (int j = ny - 1; j >= 0; j--) {
+    std::cout << separator << "line:" << ny - j << separator << std::endl;
+    for (int i = 0; i < nx; i++) {
+      float u = float(i) / float(nx);
+      float v = float(ny - j) / float(ny);
+      // origin:光线原点
+      // lower_left_corner(-2,-1,-1)+horizontal(4.0, 0.0, 0.0)+vertical(0.0, 2.0, 0.0)=upper_right_corner(2, 1, -1)
+      // lower_left_corner + u * horizontal + v * vertical映射到了画布任意一个点的方向
+      // Ray ray(origin, lower_left_corner + u * horizontal + v * vertical);
+      // 散射光
       Ray ray(origin, lower_left_corner + u * horizontal + v * vertical);
+      std::cout << "point" << i + 1 << ":\t" << ray.direction() << std::endl;
       Vec3 color   = Color(ray) * 255.99;
-      canvas[i][j] = color;
+      canvas[j][i] = color;
     }
   }
 

@@ -44,6 +44,10 @@
     "stdexcept": "cpp",
     "streambuf": "cpp",
     "typeinfo": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "ctime": "cpp",
+    "queue": "cpp",
+    "cstring": "cpp",
+    "list": "cpp"
   }
 }

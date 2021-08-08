@@ -11,8 +11,8 @@
 #include "common/ray.h"
 
 int main() {
-  int col = 200;
-  int row = 100;
+  const int col = 3;
+  const int row = 2;
 
   const char *render_target = "image.ppm";
 

@@ -28,10 +28,9 @@ byte* Canvas::ConvertToPpmData()
   // row scanning.
   for (int y = 0; y < height_; y++) {
     for (int x = 0; x < width_; x++) {
-      Vec3 color               = canvas_[x][y];
-      data[y * width_ + x]     = canvas_[x][y].r;
-      data[y * width_ + x + 1] = canvas_[x][y].g;
-      data[y * width_ + x + 2] = canvas_[x][y].b;
+      data[(y * width_ + x) * COLOR_TO_BYTE_SIZE]     = canvas_[x][y].r;
+      data[(y * width_ + x) * COLOR_TO_BYTE_SIZE + 1] = canvas_[x][y].g;
+      data[(y * width_ + x) * COLOR_TO_BYTE_SIZE + 2] = canvas_[x][y].b;
     }
   }
 

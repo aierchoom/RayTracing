@@ -10,25 +10,29 @@
 #include "common/vec3.h"
 #include "common/ray.h"
 
-int main() {
-  const int col = 3;
-  const int row = 2;
+int main()
+{
+  const int width  = 200;
+  const int height = 100;
+
+  const float COLOR_SCALE_COMP = 255.0f;
+  const int COLOR_TO_BYTE_SIZE = 3;
 
   const char *render_target = "image.ppm";
 
   std::ofstream ppm_file(render_target, std::ios::binary);
-  Canvas canvas(row, col);
+  Canvas canvas(width, height);
 
-  ppm_file << "P6\n" << col << " " << row << "\n255\n";
-  for (int i = 0; i < row; i++) {
-    for (int j = 0; j < col; j++) {
-      Vec3 color(float(j) / float(col), float(row - i) / float(row), 0.2);
-      color *= 255.99f;
-      canvas[i][j] = color;
+  ppm_file << "P6\n" << width << " " << height << "\n255\n";
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      Vec3 color(float(x) / float(width), float(height - y) / float(height), 0.2);
+      color *= COLOR_SCALE_COMP;
+      canvas[x][y] = color;
     }
   }
 
-  ppm_file.write((char *)canvas.ToPpmData(), col * row * 3);
+  ppm_file.write(canvas.ConvertToPpmData(), width * height * COLOR_TO_BYTE_SIZE);
   ppm_file.flush();
   ppm_file.close();
 

@@ -11,8 +11,12 @@ if(WIN32)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 endif(WIN32)
 
-
 set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+
+find_package(COMMON REQUIRED)
+message(STATUS "COMMON included at ${COMMON_INCLUDE_DIR}")
 
 set(CHAPTERS
   chapter1
@@ -32,6 +36,7 @@ foreach(CHAPTER ${CHAPTERS})
     )
     set(NAME "${CHAPTER}_${DEMO}")
     add_executable(${NAME} ${SOURCE})
+    target_link_libraries(${NAME} ${LIBS})
   endforeach(DEMO)
 endforeach(CHAPTER)
 

@@ -10,7 +10,8 @@
 #include "common/vec3.h"
 #include "common/ray.h"
 
-float HitSphere(const Vec3 &center, float radius, const Ray &ray) {
+float HitSphere(const Vec3 &center, float radius, const Ray &ray)
+{
   Vec3 origin_to_center = ray.origin() - center;
   // dot(B,B)
   float a = dot(ray.direction(), ray.direction());
@@ -30,7 +31,8 @@ float HitSphere(const Vec3 &center, float radius, const Ray &ray) {
   }
 }
 
-Vec3 Color(const Ray &ray) {
+Vec3 Color(const Ray &ray)
+{
   float t = HitSphere(Vec3(0.0f, 0.0f, -1.0f), 0.5f, ray);
   if (t > 0.0f) {
     Vec3 normal = UnitVector(ray.pointAtParamter(t) - Vec3(0.0f, 0.0f, -1.0f));
@@ -45,7 +47,8 @@ Vec3 Color(const Ray &ray) {
   return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);
 }
 
-int main() {
+int main()
+{
   int nx = 1200;
   int ny = 600;
 
@@ -82,7 +85,7 @@ int main() {
     }
   }
 
-  ppm_file.write(canvas.ToPpmData(), nx * ny * 3);
+  ppm_file.write(canvas.ConvertToPpmData(), nx * ny * 3);
   ppm_file.flush();
   ppm_file.close();
 

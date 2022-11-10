@@ -4,10 +4,12 @@
 #include <stdlib.h>
 #include <iostream>
 
-class Vec3 {
+class Vec3
+{
  public:
   Vec3() {}
-  Vec3(float xcomp, float ycomp, float zcomp) {
+  Vec3(float xcomp, float ycomp, float zcomp)
+  {
     this->x = xcomp;
     this->y = ycomp;
     this->z = zcomp;
@@ -40,68 +42,78 @@ class Vec3 {
   };
 };
 
-inline Vec3& Vec3::operator=(const Vec3& vec) {
+inline Vec3& Vec3::operator=(const Vec3& vec)
+{
   this->x = vec.x;
   this->y = vec.y;
   this->z = vec.z;
   return *this;
 }
 
-inline void Vec3::makeUnitVector() {
+inline void Vec3::makeUnitVector()
+{
   float k = 1.0f / length();
   x *= k;
   y *= k;
   z *= k;
 }
 
-inline Vec3& Vec3::operator+=(const Vec3& vec) {
+inline Vec3& Vec3::operator+=(const Vec3& vec)
+{
   this->x += vec.x;
   this->y += vec.y;
   this->z += vec.z;
   return *this;
 }
 
-inline Vec3& Vec3::operator-=(const Vec3& vec) {
+inline Vec3& Vec3::operator-=(const Vec3& vec)
+{
   this->x -= vec.x;
   this->y -= vec.y;
   this->z -= vec.z;
   return *this;
 }
 
-inline Vec3& Vec3::operator*=(const Vec3& vec) {
+inline Vec3& Vec3::operator*=(const Vec3& vec)
+{
   this->x *= vec.x;
   this->y *= vec.y;
   this->z *= vec.z;
   return *this;
 }
 
-inline Vec3& Vec3::operator/=(const Vec3& vec) {
+inline Vec3& Vec3::operator/=(const Vec3& vec)
+{
   this->x /= vec.x;
   this->y /= vec.y;
   this->z /= vec.z;
   return *this;
 }
 
-inline Vec3& Vec3::operator*=(const float scale) {
+inline Vec3& Vec3::operator*=(const float scale)
+{
   this->x *= scale;
   this->y *= scale;
   this->z *= scale;
   return *this;
 }
 
-inline Vec3& Vec3::operator/=(const float scale) {
+inline Vec3& Vec3::operator/=(const float scale)
+{
   this->x /= scale;
   this->y /= scale;
   this->z /= scale;
   return *this;
 }
 
-inline std::istream& operator>>(std::istream& is, Vec3& vec) {
+inline std::istream& operator>>(std::istream& is, Vec3& vec)
+{
   is >> vec.x >> vec.y >> vec.z;
   return is;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Vec3& vec) {
+inline std::ostream& operator<<(std::ostream& os, const Vec3& vec)
+{
   os << vec.x << " "
      << " " << vec.y << " " << vec.z;
   return os;
@@ -123,9 +135,7 @@ inline Vec3 operator/(const Vec3& vec, float scale) { return Vec3(vec.x / scale,
 
 inline float dot(const Vec3& lhs, const Vec3& rhs) { return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z; }
 
-inline Vec3 cross(const Vec3& lhs, const Vec3& rhs) {
-  return Vec3((lhs.y * rhs.z - lhs.z * rhs.y), (-(lhs.x * rhs.z - lhs.z * rhs.x)), (lhs.x * rhs.y - lhs.y * rhs.x));
-}
+inline Vec3 cross(const Vec3& lhs, const Vec3& rhs) { return Vec3((lhs.y * rhs.z - lhs.z * rhs.y), (-(lhs.x * rhs.z - lhs.z * rhs.x)), (lhs.x * rhs.y - lhs.y * rhs.x)); }
 
 inline Vec3 UnitVector(Vec3 vec) { return vec / vec.length(); }
 

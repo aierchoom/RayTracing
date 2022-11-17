@@ -1,8 +1,9 @@
 #ifndef COMMON_RAY_H
 
-#include "common/vec3.h"
+#include "vec3.h"
 
-class Ray {
+class Ray
+{
  public:
   Ray() {}
   Ray(const Vec3& a, const Vec3& b) : a_(a), b_(b) {}

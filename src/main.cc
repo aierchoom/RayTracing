@@ -7,25 +7,28 @@
 #include "stb_image_write.h"
 
 #include "common/Canvas.h"
-#include "common/vec3.h"
-#include "common/ray.h"
+#include "common/rtweekend.h"
+#include "common/hittable_list.h"
+#include "common/sphere.h"
+#include "common/camera.h"
 
-const char *separator = "----------";
-
-Vec3 Color(const Ray &ray)
+Vec3 RayColor(const Ray &ray, const Hittable &world)
 {
-  // 光线方向
+  Hittable::HitRecord hit_rec;
+  if (world.Hit(ray, 0, infinity, hit_rec)) {
+    return 0.5 * (hit_rec.normal + Vec3(1, 1, 1));
+  }
   Vec3 unit_direction = UnitVector(ray.direction());
-  // 光线强度(使用画布的高度作为强度，并且clamp to (0.0,1.0))
-  float t = 0.5f * (unit_direction.y + 1.0f);
-  // (1.0f - t)翻转光线的强度方向，让底部的光线更偏向于白色
-  return (1.0f - t) * Vec3(1.0f, 1.0f, 1.0f) + t * Vec3(0.5f, 0.7f, 1.0f);
+  auto t              = 0.5f * (unit_direction.y + 1.0);
+  return (1.0 - t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0);
 }
 
 int main()
 {
-  int width  = 1200;
-  int height = 600;
+  int width  = 400;
+  int height = 200;
+
+  const int samples_per_pixel = 100;
 
   const char *render_target = "image.ppm";
 
@@ -37,8 +40,14 @@ int main()
   Vec3 vertical(0.0f, 2.0f, 0.0f);
   Vec3 origin(0.0f, 0.0f, 0.0f);
 
+  HittableList world;
+  world.Add(make_shared<Sphere>(Vec3(0, 0, -1), 0.5));
+  world.Add(make_shared<Sphere>(Vec3(0, -100.5, -1), 100));
+
+  Camera camera;
+
   ppm_file << "P6\n" << width << " " << height << "\n255\n";
-  // 1.以左下角作为基准点去扫描
+  // 1.以左下角作为基准点去扫描(行扫描)
   // 2.图片绘制的习惯为从左上角开始绘制
   // 3.y=height-1,x=0;即将j光标移动到左下角开始绘制
   // 4.综上，需要翻转y轴的v值
@@ -46,22 +55,20 @@ int main()
   // 6.左下角的光线方向为(0,0,0)->(-2,-1,-1)
   // 7.右上角的光线方向为(0,0,0)->(2,1,-1)
   for (int y = height - 1; y >= 0; y--) {
-    // std::cout << separator << "line:" << height - y << separator << std::endl;
+    std::cerr << "\rScanlines remaining: " << y << ' ' << std::flush;
     for (int x = 0; x < width; x++) {
-      // lower_left_corner uv(0.0f,0.0f)
-      float u = float(x) / float(width);
-      float v = float(height - y) / float(height);
-      // origin:光线出射点
-      // lower_left_corner(-2,-1,-1)+horizontal(4.0, 0.0, 0.0)+vertical(0.0, 2.0, 0.0)=upper_right_corner(2, 1, -1)
-      // lower_left_corner + u * horizontal + v * vertical映射到了画布任意一个点的方向
-      // Ray ray(origin, lower_left_corner + u * horizontal + v * vertical);
-      // 散射光
-      Ray ray(origin, lower_left_corner + u * horizontal + v * vertical);
-      // std::cout << "point" << x + 1 << ":\t" << ray.direction() << std::endl;
-      Vec3 color   = Color(ray) * 255.99;
-      canvas[x][y] = color;
+      Vec3 color(0, 0, 0);
+      for (int s = 0; s < samples_per_pixel; ++s) {
+        auto u  = (x + random_double()) / (width);
+        auto v  = (height - y + random_double()) / (height);
+        Ray ray = camera.GetRay(u, v);
+        color += RayColor(ray, world);
+      }
+      canvas[x][y] = anti_aliasing(color, samples_per_pixel) * 255.99f;
     }
   }
+
+  std::cerr << "\nDone.\n";
 
   ppm_file.write(canvas.ConvertToPpmData(), width * height * 3);
   ppm_file.flush();

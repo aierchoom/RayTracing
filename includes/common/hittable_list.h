@@ -8,7 +8,7 @@ using std::make_shared;
 
 #include "hittable.h"
 
-class HittableList
+class HittableList : public Hittable
 {
  public:
   HittableList();

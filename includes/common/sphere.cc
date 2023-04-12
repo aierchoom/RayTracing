@@ -25,7 +25,7 @@ bool Sphere::Hit(const Ray& ray, double tmin, double tmax, HitRecord& record) co
     float root = (-half_b - delta) / a;
     if (root < tmax && root > tmin) {
       record.t            = root;
-      record.p            = ray.pointAtParamter(record.t);
+      record.p            = ray.at(record.t);
       Vec3 outward_normal = (record.p - center_) / radius_;
       record.set_face_normal(ray, outward_normal);
       return true;
@@ -34,7 +34,7 @@ bool Sphere::Hit(const Ray& ray, double tmin, double tmax, HitRecord& record) co
     root = (-half_b - delta) / a;
     if (root < tmax && root > tmin) {
       record.t            = root;
-      record.p            = ray.pointAtParamter(record.t);
+      record.p            = ray.at(record.t);
       Vec3 outward_normal = (record.p - center_) / radius_;
       record.set_face_normal(ray, outward_normal);
       return true;

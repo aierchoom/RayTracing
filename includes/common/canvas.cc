@@ -1,7 +1,6 @@
 #include "canvas.h"
 #include <vector>
 #include "vec3.h"
-#include "types.h"
 
 using std::vector;
 

@@ -2,7 +2,7 @@
 #define COMMON_CANVAS_H
 
 #include <vector>
-#include "types.h"
+#include "typesdef.h"
 
 class Vec3;
 
@@ -16,11 +16,10 @@ class Canvas
 
   byte* ConvertToPpmData();
 
- public:
+ private:
   // Saved by pixel column.
   std::vector<std::vector<Vec3>> canvas_;
 
- private:
   int width_, height_;
 };
 

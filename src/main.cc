@@ -78,14 +78,9 @@ HittableList random_scene()
   return world;
 }
 
-// 多线程优化设计
-// 1. 查询支持的最大线程，进行工作分配，由于是均匀分配，没有写入冲突，不考虑同步问题
-// 2. 一个线程接受自己的工作量 line start - line end
-// 3. 画就完事了
-
 struct RenderTarget {
-  int width                   = 1600;
-  int height                  = 800;
+  int width                   = 1660;
+  int height                  = 430;
   int samples_per_pixel       = 100;
   int max_depth               = 50;
   std::string output_filename = "image.ppm";
@@ -150,34 +145,14 @@ int main()
   for (int i = 0; i < no_max_thread; i++) {
     int start = i * steps;
     int end   = (i + 1) * steps;
+    if (i == no_max_thread - 1) {
+      end = render_target.height;
+    }
     calc_threads.push_back(std::thread(RayTracing, i, std::ref(canvas), std::ref(render_target), std::ref(world), std::ref(camera), start, end));
   }
 
   for (int i = 0; i < no_max_thread; i++) {
     calc_threads[i].join();
-  }
-
-  for (int y = render_target.height - 1; y >= 0; y--) {
-    std::cerr << "\rScanlines remaining: " << y << ' ' << std::flush;
-
-    for (int x = 0; x < render_target.width; x++) {
-      Vec3 color(0, 0, 0);
-      for (int s = 0; s < render_target.samples_per_pixel; ++s) {
-        // Random shake of UV, random shake of UV, and random sampling 100 times.
-        auto u = (x + random_double()) / (render_target.width);
-        auto v = (render_target.height - y + random_double()) / (render_target.height);
-
-        // Scatter light by using the camera as the origin of the light
-        Ray ray = camera.GetRay(u, v);
-        color += RayColor(ray, world, render_target.max_depth);
-      }
-
-      color = anti_aliasing(color, render_target.samples_per_pixel);
-      color = gamma_correct(color);
-      color *= 255.99;
-
-      canvas[x][y] = color;
-    }
   }
 
   std::cout << render_target.width << "x" << render_target.height << "\nDone.\n";

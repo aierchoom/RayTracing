@@ -14,6 +14,8 @@ class Canvas
 
   std::vector<Vec3>& operator[](int index);
 
+  int GetDataSize() const;
+
   byte* ConvertToPpmData();
 
  private:

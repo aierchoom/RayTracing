@@ -18,6 +18,8 @@ Canvas::~Canvas() {}
 
 vector<Vec3>& Canvas::operator[](int x) { return canvas_[x]; }
 
+int Canvas::GetDataSize() const { return width_ * height_ * 3; }
+
 byte* Canvas::ConvertToPpmData()
 {
   const int COLOR_TO_BYTE_SIZE = 3;

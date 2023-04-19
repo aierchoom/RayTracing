@@ -48,6 +48,9 @@
     "ctime": "cpp",
     "queue": "cpp",
     "cstring": "cpp",
-    "list": "cpp"
+    "list": "cpp",
+    "thread": "cpp",
+    "chrono": "cpp",
+    "ratio": "cpp"
   }
 }

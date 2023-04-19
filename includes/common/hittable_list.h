@@ -1,10 +1,7 @@
-#ifndef HITTABLE_LIST_H
-#define HITTABLE_LIST_H
+#ifndef COMMON_HITTABLE_LIST_H
+#define COMMON_HITTABLE_LIST_H
 #include <memory>
 #include <vector>
-
-using std::shared_ptr;
-using std::make_shared;
 
 #include "hittable.h"
 
@@ -12,14 +9,14 @@ class HittableList : public Hittable
 {
  public:
   HittableList();
-  HittableList(shared_ptr<Hittable> object);
+  HittableList(std::shared_ptr<Hittable> object);
 
   void Clear();
-  void Add(shared_ptr<Hittable> object);
+  void Add(std::shared_ptr<Hittable> object);
 
-  virtual bool Hit(const Ray& ray, double tmin, double tmax, Hittable::HitRecord& record) const;
+  virtual bool Hit(const Ray& ray, double tmin, double tmax, HitRecord& record) const;
 
  private:
-  std::vector<shared_ptr<Hittable>> objects_;
+  std::vector<std::shared_ptr<Hittable>> objects_;
 };
-#endif  // HITTABLE_LIST_H
+#endif  // COMMON_HITTABLE_LIST_H

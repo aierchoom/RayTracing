@@ -3,6 +3,8 @@
 #include <chrono>
 #include <thread>
 
+#include <omp.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -79,17 +81,16 @@ HittableList random_scene()
 }
 
 struct RenderTarget {
-  int width                   = 1660;
-  int height                  = 430;
-  int samples_per_pixel       = 100;
-  int max_depth               = 50;
+  int width                   = 1600;
+  int height                  = 800;
+  int samples_per_pixel       = 20;
+  int max_depth               = 100;
   std::string output_filename = "image.ppm";
 };
 
-void RayTracing(int thread_id, Canvas &canvas, const RenderTarget &render_target, HittableList &world, Camera &camera, int start, int end)
+void RayTracingThreadFunc(int thread_id, Canvas &canvas, const RenderTarget &render_target, HittableList &world, Camera &camera, int start, int end)
 {
   for (int y = end - 1; y >= start; y--) {
-    // std::cout << "Thread :" << thread_id << "\t Scanlines remaining: " << y << '\n' << std::flush;
     for (int x = 0; x < render_target.width; x++) {
       Vec3 color(0, 0, 0);
       for (int s = 0; s < render_target.samples_per_pixel; ++s) {
@@ -108,6 +109,27 @@ void RayTracing(int thread_id, Canvas &canvas, const RenderTarget &render_target
 
       canvas[x][y] = color;
     }
+  }
+}
+
+void StartRayTracingThreads(RenderTarget &render_target, Canvas &canvas, HittableList &world, Camera &camera)
+{
+  const int no_max_thread = std::thread::hardware_concurrency();
+
+  std::vector<std::thread> calc_threads;
+
+  int steps = render_target.height / no_max_thread;
+  for (int i = 0; i < no_max_thread; i++) {
+    int start = i * steps;
+    int end   = (i + 1) * steps;
+    if (i == no_max_thread - 1) {
+      end = render_target.height;
+    }
+    calc_threads.push_back(std::thread(RayTracingThreadFunc, i, std::ref(canvas), std::ref(render_target), std::ref(world), std::ref(camera), start, end));
+  }
+
+  for (int i = 0; i < no_max_thread; i++) {
+    calc_threads[i].join();
   }
 }
 
@@ -138,21 +160,32 @@ int main()
 
   auto start = std::chrono::steady_clock::now();
 
-  const int no_max_thread = std::thread::hardware_concurrency();
-  std::vector<std::thread> calc_threads;
+  bool usedMultiThread = false;
 
-  int steps = render_target.height / no_max_thread;
-  for (int i = 0; i < no_max_thread; i++) {
-    int start = i * steps;
-    int end   = (i + 1) * steps;
-    if (i == no_max_thread - 1) {
-      end = render_target.height;
+  if (usedMultiThread) {
+    StartRayTracingThreads(render_target, canvas, world, camera);
+  } else {
+#pragma omp parallel for num_threads(16)
+    for (int y = render_target.height - 1; y >= 0; y--) {
+      for (int x = 0; x < render_target.width; x++) {
+        Vec3 color(0, 0, 0);
+        for (int s = 0; s < render_target.samples_per_pixel; ++s) {
+          // Random shake of UV, random shake of UV, and random sampling 100 times.
+          auto u = (x + random_double()) / (render_target.width);
+          auto v = (render_target.height - y + random_double()) / (render_target.height);
+
+          // Scatter light by using the camera as the origin of the light
+          Ray ray = camera.GetRay(u, v);
+          color += RayColor(ray, world, render_target.max_depth);
+        }
+
+        color = anti_aliasing(color, render_target.samples_per_pixel);
+        color = gamma_correct(color);
+        color *= 255.99;
+
+        canvas[x][y] = color;
+      }
     }
-    calc_threads.push_back(std::thread(RayTracing, i, std::ref(canvas), std::ref(render_target), std::ref(world), std::ref(camera), start, end));
-  }
-
-  for (int i = 0; i < no_max_thread; i++) {
-    calc_threads[i].join();
   }
 
   std::cout << render_target.width << "x" << render_target.height << "\nDone.\n";
@@ -167,10 +200,11 @@ int main()
   std::string output_path = "image.png";
   stbi_write_png(output_path.c_str(), w, h, channel, data, 0);
 
-  std::string show_output = "mspaint " + output_path;
+  std::string show_output = "start mspaint " + output_path;
 
   auto end = std::chrono::steady_clock::now();
-  std::cout << "Total cost:" << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000000.f << "s" << std::endl;
+  std::cout << (usedMultiThread ? "Custom MultiThread-" : "Openmp-") << "Total cost:" << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000000.f
+            << "s" << std::endl;
 
   system(show_output.c_str());
 }

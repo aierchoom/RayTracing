@@ -17,11 +17,10 @@ bool Sphere::Hit(const Ray& ray, double tmin, double tmax, HitRecord& record) co
   float half_b = dot(ray.Direction(), origin_to_center);
 
   // dot(A-C,A-C)-R*R
+  // 将上述球体方程看作二次式求t的解
   float c = dot(origin_to_center, origin_to_center) - radius_ * radius_;
   // t*t*dot(B,B)+2*t*dot(B,A-C)+dot(A-C,A-C)-R*R=0
-  // 将上述球体方程看作二次式求t的解
   float discriminant = half_b * half_b - a * c;
-  // 当方程无解(即光线未命中球体时，返回未击中)
   if (discriminant > 0) {
     float delta = sqrt(discriminant);
     // +root
